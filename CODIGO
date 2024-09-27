@@ -1,0 +1,127 @@
+Created on Fri Sep 27 11:33:52 2024
+
+@author: amandapiassi
+"""
+
+import aacgmv2
+import numpy as np
+from datetime import datetime
+from geopy.distance import geodesic
+
+# Conjunto de estações
+estacoes = [
+    {'nome': 'KHB', 'lat': 47.6100, 'lon': 134.6900, 'alt_km': 0.092}, #Russia
+    {'nome': 'NVS', 'lat': 54.8500, 'lon': 83.2300, 'alt_km': 0.130}, #Russia
+    {'nome': 'YAK', 'lat': 61.960, 'lon': 129.6600, 'alt_km': 0.100}, #Russia
+    {'nome': 'PET', 'lat': 52.9710, 'lon': 158.2480, 'alt_km': 0.100}, #Russia
+    {'nome': 'KAK', 'lat': 36.23, 'lon': 140.18, 'alt_km': 0.036}, #Japan
+    {'nome': 'KNY', 'lat': 31.42, 'lon': 130.88, 'alt_km': 0.107}, #Japan
+    {'nome': 'BMT', 'lat': 40.3000, 'lon': 116.2000, 'alt_km': 0.183}, #China
+    {'nome': 'CYG', 'lat': 36.3700, 'lon': 126.8540, 'alt_km': 0.165}, #Korea
+    {'nome': 'ABG', 'lat': 18.62, 'lon': 72.87, 'alt_km': 0.007}, #ITALIA
+    {'nome': 'DUR', 'lat': 41.35, 'lon': 14.46, 'alt_km': 0.920}, #ITALIA
+    {'nome': 'SJG', 'lat': 18.11, 'lon': 293.85, 'alt_km': 0.424}, #EUA
+    {'nome': 'TUC', 'lat': 32.17, 'lon': -110.91, 'alt_km': 0.447}, #Eua
+    {'nome': 'SHU', 'lat': 55.3500, 'lon': -160.4600, 'alt_km': 0.080}, #Eua
+    {'nome': 'FRD', 'lat': 38.2100, 'lon': -77.3670, 'alt_km': 0.069},  #eua
+    {'nome': 'GUI', 'lat': 28.32, 'lon': -16.43, 'alt_km': 0.289}, #SPAIN
+    {'nome': 'ASC', 'lat': -7.95, 'lon': -14.38, 'alt_km': 0.859}, #United Kingdom
+    {'nome': 'BLC', 'lat': 64.318, 'lon': -96.012, 'alt_km': 0.030}, #canada
+    {'nome': 'OTT', 'lat': 45.42, 'lon': -75.92, 'alt_km': 0.075}, #Canada
+    {'nome': 'MEA', 'lat': 54.616, 'lon': -113.3470, 'alt_km': 0.700}, #CANADA
+    {'nome': 'IQA', 'lat': 63.7530, 'lon': -68.5180, 'alt_km': 0.067}, #Canada
+    {'nome': 'OTT', 'lat': 45.4030, 'lon': -75.5520, 'alt_km': 0.075}, #canada
+    {'nome': 'WNG', 'lat': 53.725, 'lon': 9.0530, 'alt_km': 0.066}, #Germany
+    {'nome': 'NGK', 'lat': 52.0700, 'lon': 12.6800, 'alt_km': 0.078},  #Germany
+    {'nome': 'MAB', 'lat': 50.2980, 'lon': 5.6820, 'alt_km': 0.440},  #Belgica
+    {'nome': 'DOU', 'lat': 50.1000, 'lon': 4.6000, 'alt_km': 0.225},  #Belgica
+    {'nome': 'CLF', 'lat': 48.0250, 'lon': 2.2600, 'alt_km': 0.145},  #Franca
+    {'nome': 'LYC', 'lat': 64.6120, 'lon': 18.7480, 'alt_km': 0.270},  #Suécia
+    {'nome': 'UPS', 'lat': 59.9030, 'lon': 17.3530, 'alt_km': 0.050},  #Suécia
+    {'nome': 'WIC', 'lat': 47.9305, 'lon': 15.8657, 'alt_km': 1.088},  #Austria
+    {'nome': 'CNB', 'lat': -35.30, 'lon': 149.13, 'alt_km': 0.859}, #Australia
+    {'nome': 'KDU', 'lat': -12.69, 'lon': 132.47, 'alt_km': 0.140}, #Australia
+    {'nome': 'ASP', 'lat': -23.77, 'lon': 133.88, 'alt_km': 0.557}, #Australia
+    {'nome': 'ASP', 'lat': -54.5000, 'lon': 158.9500, 'alt_km': 0.004}, #Australia
+    {'nome': 'EYR', 'lat': -43.4740, 'lon': 172.3930, 'alt_km': 0.102}, #Australia
+    {'nome': 'BOA', 'lat': 2.800556, 'lon': -60.675833, 'alt_km': 0.090}, #Brazil
+    {'nome': 'MAN', 'lat':-2.888333, 'lon': -59.969722, 'alt_km': 0.092}, #Brazil
+    {'nome': 'SJC', 'lat':-23.208611, 'lon': -45.963611, 'alt_km': 0.600}, #Brazil
+    {'nome': 'CXP', 'lat':-22.701944, 'lon': -45.014444, 'alt_km': 0.521}, #Brazil
+    {'nome': 'SMS', 'lat': -29.44, 'lon': 306.18, 'alt_km': 0.453}, #Brazil
+    {'nome': 'TTB', 'lat': -1.2050, 'lon':  -48.5130, 'alt_km': 0.010}, #brasil
+    {'nome': 'PIL', 'lat': -31.6670, 'lon': -63.8810, 'alt_km': 0.336}, #Argentina
+    {'nome': 'HBK', 'lat': -25.8800, 'lon': 27.7100, 'alt_km': 1.555}, #SouthAfrica
+    {'nome': 'HER', 'lat':-34.43, 'lon': 19.23, 'alt_km': 0.026}, #SouthAfrica
+    {'nome': 'KMH', 'lat': -26.54, 'lon': 18.11, 'alt_km': 1.003},  #SouthAfrica
+    {'nome': 'BNG', 'lat': 4.3300, 'lon': 18.11, 'alt_km': 0.395},  #centralAfrica
+   
+]
+# Função para selecionar uma estação pelo nome
+def selecionar_estacao_por_nome(nome, estacoes):
+    for estacao in estacoes:
+        if estacao['nome'].upper() == nome.upper():  # Compara ignorando maiúsculas e minúsculas
+            return estacao
+    return None  # Retorna None se a estação não for encontrada
+
+# Função para calcular a estação conjugada e o L-shell
+def calcular_estacao_conjugada(lat, lon, alt_km, dtime):
+    # Converter de latitude/longitude geográfica para geomagnética
+    geomag_lat, geomag_lon, _ = aacgmv2.wrapper.convert_latlon(lat, lon, alt_km, dtime, method_code='G2A')
+    
+    # Calcular o L-shell para a estação original
+    L_shell_original = 1 / (np.cos(np.radians(geomag_lat)) ** 2)
+
+    # Calcular o ponto conjugado invertendo a latitude geomagnética
+    conjugate_geomag_lat = -geomag_lat
+    conjugate_geomag_lon = geomag_lon
+    
+    # Converter as coordenadas geomagnéticas conjugadas de volta para coordenadas geográficas
+    conjugate_geo_lat, conjugate_geo_lon, _ = aacgmv2.wrapper.convert_latlon(conjugate_geomag_lat, conjugate_geomag_lon, alt_km, dtime, method_code='A2G')
+
+    # Calcular o L-shell para a estação conjugada
+    L_shell_conjugada = 1 / (np.cos(np.radians(conjugate_geomag_lat)) ** 2)
+    
+    return conjugate_geo_lat, conjugate_geo_lon, L_shell_original, L_shell_conjugada
+
+# Função para encontrar a estação mais próxima de um ponto conjugado
+def encontrar_estacao_mais_proxima(conjugate_lat, conjugate_lon, estacoes):
+    menor_distancia = float('inf')
+    estacao_mais_proxima = None
+    
+    for estacao in estacoes:
+        # Coordenadas geográficas da estação
+        estacao_coords = (estacao['lat'], estacao['lon'])
+        conjugate_coords = (conjugate_lat, conjugate_lon)
+        
+        # Calcular a distância geodésica
+        distancia = geodesic(estacao_coords, conjugate_coords).km
+        
+        # Verificar se essa é a estação mais próxima
+        if distancia < menor_distancia:
+            menor_distancia = distancia
+            estacao_mais_proxima = estacao
+    
+    return estacao_mais_proxima, menor_distancia
+
+# Selecionar a estação pelo nome
+nome_estacao = 'SMS'  # Nome da estação para seleção
+estacao_selecionada = selecionar_estacao_por_nome(nome_estacao, estacoes)
+
+if estacao_selecionada is None:
+    print(f"Estação com nome {nome_estacao} não encontrada.")
+else:
+    dtime = datetime(2024, 9, 27)  # Data e hora do evento
+    conjugate_lat, conjugate_lon, L_shell_original, L_shell_conjugada = calcular_estacao_conjugada(
+        estacao_selecionada['lat'], estacao_selecionada['lon'], estacao_selecionada['alt_km'], dtime
+    )
+
+    # Encontrar a estação mais próxima do ponto conjugado
+    estacao_proxima, distancia = encontrar_estacao_mais_proxima(conjugate_lat, conjugate_lon, estacoes)
+
+    # Exibir resultados
+    print(f"Estação selecionada: {estacao_selecionada['nome']}")
+    print(f"Coordenadas conjugadas: Latitude: {conjugate_lat:.3f}, Longitude: {conjugate_lon:.3f}")
+    print(f"L-shell da estação original: {L_shell_original:.3f}")
+    print(f"L-shell da estação conjugada: {L_shell_conjugada:.3f}")
+    print(f"Estação mais próxima do ponto conjugado: {estacao_proxima['nome']} a {distancia:.2f} km de distância")

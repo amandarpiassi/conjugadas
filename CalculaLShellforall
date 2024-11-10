@@ -1,7 +1,332 @@
-#%%
-date = '2022-05-05'
-#TABELACONFERIDA
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Sep 27 11:33:52 2024
 
+@author: amand
+"""
+
+import aacgmv2
+import numpy as np
+from datetime import datetime
+from geopy.distance import geodesic
+
+# Conjunto de estações
+estacoes2 = [
+    {'nome': 'KHB', 'lat': 47.6100, 'lon': 134.6900, 'alt_km': 0.092}, #Russia
+    {'nome': 'NVS', 'lat': 54.8500, 'lon': 83.2300, 'alt_km': 0.130}, #Russia
+    {'nome': 'YAK', 'lat': 61.960, 'lon': 129.6600, 'alt_km': 0.100}, #Russia
+    {'nome': 'PET', 'lat': 52.9710, 'lon': 158.2480, 'alt_km': 0.100}, #Russia
+    {'nome': 'KAK', 'lat': 36.23, 'lon': 140.18, 'alt_km': 0.036}, #Japan
+    {'nome': 'KNY', 'lat': 31.42, 'lon': 130.88, 'alt_km': 0.107}, #Japan
+    {'nome': 'BMT', 'lat': 40.3000, 'lon': 116.2000, 'alt_km': 0.183}, #China
+    {'nome': 'CYG', 'lat': 36.3700, 'lon': 126.8540, 'alt_km': 0.165}, #Korea
+    {'nome': 'ABG', 'lat': 18.62, 'lon': 72.87, 'alt_km': 0.007}, #ITALIA
+    {'nome': 'DUR', 'lat': 41.35, 'lon': 14.46, 'alt_km': 0.920}, #ITALIA
+    {'nome': 'SJG', 'lat': 18.11, 'lon': 293.85, 'alt_km': 0.424}, #EUA
+    {'nome': 'TUC', 'lat': 32.17, 'lon': -110.91, 'alt_km': 0.447}, #Eua
+    {'nome': 'SHU', 'lat': 55.3500, 'lon': -160.4600, 'alt_km': 0.080}, #Eua
+    {'nome': 'FRD', 'lat': 38.2100, 'lon': -77.3670, 'alt_km': 0.069},  #eua
+    {'nome': 'GUI', 'lat': 28.32, 'lon': -16.43, 'alt_km': 0.289}, #SPAIN
+    {'nome': 'ASC', 'lat': -7.95, 'lon': -14.38, 'alt_km': 0.859}, #United Kingdom
+    {'nome': 'BLC', 'lat': 64.318, 'lon': -96.012, 'alt_km': 0.030}, #canada
+    {'nome': 'OTT', 'lat': 45.42, 'lon': -75.92, 'alt_km': 0.075}, #Canada
+    {'nome': 'MEA', 'lat': 54.616, 'lon': -113.3470, 'alt_km': 0.700}, #CANADA
+    {'nome': 'IQA', 'lat': 63.7530, 'lon': -68.5180, 'alt_km': 0.067}, #Canada
+    {'nome': 'OTT', 'lat': 45.4030, 'lon': -75.5520, 'alt_km': 0.075}, #canada
+    {'nome': 'AIA', 'lat': -65.245, 'lon': -64.255 , 'alt_km': 0.010}, #antartida
+    {'nome': 'WNG', 'lat': 53.725, 'lon': 9.0530, 'alt_km': 0.066}, #Germany
+    {'nome': 'NGK', 'lat': 52.0700, 'lon': 12.6800, 'alt_km': 0.078},  #Germany
+    {'nome': 'MAB', 'lat': 50.2980, 'lon': 5.6820, 'alt_km': 0.440},  #Belgica
+    {'nome': 'DOU', 'lat': 50.1000, 'lon': 4.6000, 'alt_km': 0.225},  #Belgica
+    {'nome': 'CLF', 'lat': 48.0250, 'lon': 2.2600, 'alt_km': 0.145},  #Franca
+    {'nome': 'LYC', 'lat': 64.6120, 'lon': 18.7480, 'alt_km': 0.270},  #Suécia
+    {'nome': 'UPS', 'lat': 59.9030, 'lon': 17.3530, 'alt_km': 0.050},  #Suécia
+    {'nome': 'WIC', 'lat': 47.9305, 'lon': 15.8657, 'alt_km': 1.088},  #Austria
+    {'nome': 'CNB', 'lat': -35.30, 'lon': 149.13, 'alt_km': 0.859}, #Australia
+    {'nome': 'KDU', 'lat': -12.69, 'lon': 132.47, 'alt_km': 0.140}, #Australia
+    {'nome': 'ASP', 'lat': -23.77, 'lon': 133.88, 'alt_km': 0.557}, #Australia
+    #{'nome': 'ASP', 'lat': -54.5000, 'lon': 158.9500, 'alt_km': 0.004}, #Australia
+    {'nome': 'EYR', 'lat': -43.4740, 'lon': 172.3930, 'alt_km': 0.102}, #Australia
+    {'nome': 'BOA', 'lat': 2.800556, 'lon': -60.675833, 'alt_km': 0.090}, #Brazil
+    {'nome': 'MAN', 'lat':-2.888333, 'lon': -59.969722, 'alt_km': 0.092}, #Brazil
+    {'nome': 'SJC', 'lat':-23.208611, 'lon': -45.963611, 'alt_km': 0.600}, #Brazil
+    {'nome': 'CXP', 'lat':-22.701944, 'lon': -45.014444, 'alt_km': 0.521}, #Brazil
+    {'nome': 'SMS', 'lat': -29.44, 'lon': 306.18, 'alt_km': 0.453}, #Brazil
+    {'nome': 'TTB', 'lat': -1.2050, 'lon':  -48.5130, 'alt_km': 0.010}, #brasil
+    {'nome': 'PIL', 'lat': -31.6670, 'lon': -63.8810, 'alt_km': 0.336}, #Argentina
+    {'nome': 'HBK', 'lat': -25.8800, 'lon': 27.7100, 'alt_km': 1.555}, #SouthAfrica
+    {'nome': 'HER', 'lat':-34.43, 'lon': 19.23, 'alt_km': 0.026}, #SouthAfrica
+    {'nome': 'KMH', 'lat': -26.54, 'lon': 18.11, 'alt_km': 1.003},  #SouthAfrica
+    {'nome': 'BNG', 'lat': 4.3300, 'lon': 18.11, 'alt_km': 0.395},  #centralAfrica
+    {'nome': 'TSU', 'lat': -19.2020, 'lon': 17.5840, 'alt_km': 1.273},  #SouthAfrica
+    {'nome': 'BLC', 'lat': 64.3180, 'lon': -96.0120, 'alt_km': 0.030},  #cANADA
+    {'nome': 'THL', 'lat': 77.4700, 'lon': -69.2270, 'alt_km': 0.057}, #Groelandia
+    {'nome': 'PIL', 'lat': 31.6670, 'lon': -63.8810, 'alt_km': 0.057},
+    {'nome': 'TAM', 'lat': 22.7900, 'lon': 5.5300, 'alt_km': 1.373},#Africa
+    {'nome': 'ABG', 'lat': 18.638, 'lon': 72.872, 'alt_km': 0.007},#India
+    {'nome': 'JAI', 'lat': 26.9200, 'lon': 75.800, 'alt_km': 0.000},#India
+    {'nome': 'HYB', 'lat': 17.4200, 'lon': 78.5500, 'alt_km': 0.500},#India
+    {'nome': 'CPL', 'lat': 17.29, 'lon': 78.919, 'alt_km': 0.500},#India
+    {'nome': 'GAN', 'lat': -0.6946, 'lon': 73.153, 'alt_km': 0.002},#Maldivas
+    
+     
+]
+
+
+
+estacoes = [
+    {'nome': 'AAE', 'lat': 9.035, 'lon': 38.770, 'alt_km': 0.000, 'country': 'Ethiopia'},
+    {'nome': 'ABG', 'lat': 18.638, 'lon': 72.872, 'alt_km': 0.007, 'country': 'India'},
+    {'nome': 'ABK', 'lat': 68.358, 'lon': 18.823, 'alt_km': 0.000, 'country': 'Sweden'},
+    {'nome': 'AIA', 'lat': -65.245, 'lon': -64.258, 'alt_km': 0.000, 'country': 'Antarctica'},
+    {'nome': 'ALE', 'lat': 82.497, 'lon': -62.353, 'alt_km': 0.000, 'country': 'Canada'},
+    {'nome': 'AMS', 'lat': -37.800, 'lon': 77.570, 'alt_km': 0.000, 'country': 'French Southern and Antarctic Lands'},
+    {'nome': 'API', 'lat': -13.816, 'lon': -171.781, 'alt_km': 0.000, 'country': 'Samoa'},
+    {'nome': 'AQU', 'lat': 42.380, 'lon': 13.320, 'alt_km': 0.000, 'country': 'Italy'},
+    {'nome': 'ARS', 'lat': 56.433, 'lon': 58.567, 'alt_km': 0.000, 'country': 'Russia'},
+    {'nome': 'ASC', 'lat': -7.950, 'lon': -14.380, 'alt_km': 0.000, 'country': 'Ascension Island'},
+    {'nome': 'ASP', 'lat': -23.762, 'lon': 133.883, 'alt_km': 0.000, 'country': 'Australia'},
+    {'nome': 'BDV', 'lat': 49.080, 'lon': 14.020, 'alt_km': 0.000, 'country': 'Czech Republic'},
+    {'nome': 'BEL', 'lat': 51.836, 'lon': 20.789, 'alt_km': 0.000, 'country': 'Poland'},
+    {'nome': 'BFE', 'lat': 55.625, 'lon': 11.672, 'alt_km': 0.000, 'country': 'Denmark'},
+    {'nome': 'BFO', 'lat': 48.331, 'lon': 8.325, 'alt_km': 0.000, 'country': 'Germany'},
+    {'nome': 'BLC', 'lat': 64.318, 'lon': -96.012, 'alt_km': 0.000, 'country': 'Canada'},
+    {'nome': 'BMT', 'lat': 40.300, 'lon': 116.200, 'alt_km': 0.183, 'country': 'China'},
+    {'nome': 'BNG', 'lat': 4.330, 'lon': 18.570, 'alt_km': 0.000, 'country': 'Central African Republic'},
+    {'nome': 'BOU', 'lat': 40.140, 'lon': -105.233, 'alt_km': 0.000, 'country': 'USA'},
+    {'nome': 'BOX', 'lat': 58.070, 'lon': 38.230, 'alt_km': 0.000, 'country': 'Russia'},
+    {'nome': 'BRD', 'lat': 49.870, 'lon': -99.974, 'alt_km': 0.000, 'country': 'Canada'},
+    {'nome': 'BRW', 'lat': 71.320, 'lon': -156.620, 'alt_km': 0.000, 'country': 'USA'},
+    {'nome': 'BSL', 'lat': 30.350, 'lon': -89.640, 'alt_km': 0.000, 'country': 'USA'},
+    {'nome': 'CBB', 'lat': 69.123, 'lon': -105.031, 'alt_km': 0.000, 'country': 'Canada'},
+    {'nome': 'CKI', 'lat': -12.188, 'lon': 96.834, 'alt_km': 0.000, 'country': 'Cocos (Keeling) Islands'},
+    {'nome': 'CLF', 'lat': 48.025, 'lon': 2.260, 'alt_km': 0.000, 'country': 'France'},
+    {'nome': 'CMO', 'lat': 64.870, 'lon': -147.860, 'alt_km': 0.000, 'country': 'USA'},
+    {'nome': 'CNB', 'lat': -35.320, 'lon': 149.360, 'alt_km': 0.000, 'country': 'Australia'},
+    {'nome': 'CNH', 'lat': 44.080, 'lon': 124.860, 'alt_km': 0.000, 'country': 'China'},
+    {'nome': 'CPL', 'lat': 17.294, 'lon': 78.919, 'alt_km': 0.000, 'country': 'India'},
+    {'nome': 'CSY', 'lat': -66.283, 'lon': 110.533, 'alt_km': 0.000, 'country': 'Antarctica'},
+    {'nome': 'CTA', 'lat': -20.090, 'lon': 146.264, 'alt_km': 0.000, 'country': 'Australia'},
+    {'nome': 'CYG', 'lat': 36.370, 'lon': 126.854, 'alt_km': 0.165, 'country': 'South Korea'},
+    {'nome': 'CZT', 'lat': -46.430, 'lon': 51.860, 'alt_km': 0.000, 'country': 'Tristan da Cunha'},
+    {'nome': 'DED', 'lat': 70.360, 'lon': -148.790, 'alt_km': 0.000, 'country': 'USA'},
+    {'nome': 'DLR', 'lat': 29.490, 'lon': -100.917, 'alt_km': 0.000, 'country': 'USA'},
+    {'nome': 'DLT', 'lat': 11.950, 'lon': 108.480, 'alt_km': 0.000, 'country': 'Vietnam'},
+    {'nome': 'DOU', 'lat': 50.100, 'lon': 4.600, 'alt_km': 0.000, 'country': 'Belgium'},
+    {'nome': 'DRV', 'lat': -66.670, 'lon': 140.010, 'alt_km': 0.000, 'country': 'Antarctica'},
+    {'nome': 'DUR', 'lat': 41.650, 'lon': 14.470, 'alt_km': 0.920, 'country': 'Italy'},
+    {'nome': 'EBR', 'lat': 40.957, 'lon': 0.333, 'alt_km': 0.000, 'country': 'Spain'},
+    {'nome': 'ESK', 'lat': 55.314, 'lon': -3.206, 'alt_km': 0.000, 'country': 'UK'},
+    {'nome': 'EYR', 'lat': -43.474, 'lon': 172.393, 'alt_km': 0.000, 'country': 'New Zealand'},
+    {'nome': 'FCC', 'lat': 58.759, 'lon': -94.088, 'alt_km': 0.000, 'country': 'Canada'},
+    {'nome': 'FRD', 'lat': 38.210, 'lon': -77.367, 'alt_km': 0.000, 'country': 'USA'},
+    {'nome': 'FRN', 'lat': 37.090, 'lon': -119.720, 'alt_km': 0.000, 'country': 'USA'},
+    {'nome': 'FUR', 'lat': 48.170, 'lon': 11.280, 'alt_km': 0.000, 'country': 'Germany'},
+    {'nome': 'GAN', 'lat': -0.695, 'lon': 73.154, 'alt_km': 0.000, 'country': 'Maldives'},
+    {'nome': 'GCK', 'lat': 44.633, 'lon': 20.767, 'alt_km': 0.000, 'country': 'Serbia'},
+    {'nome': 'GDH', 'lat': 69.252, 'lon': -53.533, 'alt_km': 0.000, 'country': 'Greenland'},
+    {'nome': 'GLN', 'lat': 49.645, 'lon': -97.120, 'alt_km': 0.000, 'country': 'Canada'},
+    {'nome': 'GNA', 'lat': -31.780, 'lon': 115.947, 'alt_km': 0.000, 'country': 'Australia'},
+    {'nome': 'GNG', 'lat': -31.356, 'lon': 115.715, 'alt_km': 0.000, 'country': 'Australia'},
+    {'nome': 'GUA', 'lat': 13.590, 'lon': 144.870, 'alt_km': 0.000, 'country': 'Guam'},
+    {'nome': 'GUI', 'lat': 28.321, 'lon': -16.441, 'alt_km': 0.000, 'country': 'Spain'},
+    {'nome': 'GZH', 'lat': 23.970, 'lon': 112.450, 'alt_km': 0.000, 'country': 'China'},
+    {'nome': 'HAD', 'lat': 51.000, 'lon': -4.480, 'alt_km': 0.000, 'city': 'Hartland', 'local': 'Intermag'},
+    {'nome': 'HBK', 'lat': -25.880, 'lon': 27.710, 'alt_km': 0.000, 'city': 'Hartebeesthoek', 'local': 'Intermag'},
+    {'nome': 'HER', 'lat': -34.430, 'lon': 19.230, 'alt_km': 0.000, 'city': 'Hermanus', 'local': 'Intermag'},
+    {'nome': 'HLP', 'lat': 54.603, 'lon': 18.811, 'alt_km': 0.000, 'city': 'Hel Observatory', 'local': 'Intermag'},
+    {'nome': 'HON', 'lat': 21.320, 'lon': -158.000, 'alt_km': 0.000, 'city': 'Honolulu', 'local': 'Intermag'},
+    {'nome': 'HRB', 'lat': 47.873, 'lon': 18.190, 'alt_km': 0.000, 'city': 'Hurbanovo', 'local': 'Intermag'},
+    {'nome': 'HRN', 'lat': 77.000, 'lon': 15.550, 'alt_km': 0.000, 'city': 'Hornsund', 'local': 'Intermag'},
+    {'nome': 'HUA', 'lat': -12.050, 'lon': -75.330, 'alt_km': 0.000, 'city': 'Huancayo', 'local': 'Intermag'},
+    {'nome': 'HYB', 'lat': 17.420, 'lon': 78.550, 'alt_km': 0.000, 'city': 'Hyderabad', 'local': 'Intermag'},
+    {'nome': 'IPM', 'lat': -27.171, 'lon': -109.420, 'alt_km': 0.000, 'city': 'Isla de Pascua', 'local': 'Intermag'},
+    {'nome': 'IQA', 'lat': 63.753, 'lon': -68.518, 'alt_km': 0.000, 'city': 'Iqaluit', 'local': 'Intermag'},
+    {'nome': 'IRT', 'lat': 52.170, 'lon': 104.450, 'alt_km': 0.000, 'city': 'Irkutsk (Patrony)', 'local': 'Intermag'},
+    {'nome': 'ISK', 'lat': 41.063, 'lon': 29.062, 'alt_km': 0.000, 'city': 'Istanbul-Kandili', 'local': 'Intermag'},
+    {'nome': 'IZN', 'lat': 40.500, 'lon': 29.720, 'alt_km': 0.000, 'city': 'Iznik', 'local': 'Intermag'},
+    {'nome': 'JAI', 'lat': 26.920, 'lon': 75.800, 'alt_km': 0.000, 'city': 'Jaipur', 'local': 'Intermag'},
+    {'nome': 'JCO', 'lat': 70.356, 'lon': -148.799, 'alt_km': 0.000, 'city': 'Jim Carrigan Observatory', 'local': 'Intermag'},
+    {'nome': 'KAK', 'lat': 36.232, 'lon': 140.186, 'alt_km': 0.000, 'city': 'Kakioka', 'local': 'Intermag'},
+    {'nome': 'KDU', 'lat': -12.690, 'lon': 132.470, 'alt_km': 0.000, 'city': 'Kakadu', 'local': 'Intermag'},
+    {'nome': 'KEP', 'lat': -54.282, 'lon': -36.493, 'alt_km': 0.000, 'city': 'King Edward Point', 'local': 'Intermag'},
+    {'nome': 'KHB', 'lat': 47.610, 'lon': 134.690, 'alt_km': 0.000, 'city': 'Khabarovsk', 'local': 'Intermag'},
+    {'nome': 'KIV', 'lat': 50.720, 'lon': 30.300, 'alt_km': 0.000, 'city': 'Kiev Dymer', 'local': 'Intermag'},
+    {'nome': 'KMH', 'lat': -26.540, 'lon': 18.110, 'alt_km': 0.000, 'city': 'Keetmanshoop', 'local': 'Intermag'},
+    {'nome': 'KNY', 'lat': 31.420, 'lon': 130.880, 'alt_km': 0.000, 'city': 'Kanoya', 'local': 'Intermag'},
+    {'nome': 'KOU', 'lat': 5.210, 'lon': -52.730, 'alt_km': 0.000, 'city': 'Kourou, Guyana', 'local': 'Intermag'},
+    {'nome': 'LER', 'lat': 60.138, 'lon': -1.183, 'alt_km': 0.000, 'city': 'Lerwick', 'local': 'Intermag'},
+    {'nome': 'LNP', 'lat': 25.000, 'lon': 121.167, 'alt_km': 0.000, 'city': 'Lunping', 'local': 'Intermag'},
+    {'nome': 'LON', 'lat': 45.408, 'lon': 16.659, 'alt_km': 0.000, 'city': 'Lonjsko Polje', 'local': 'Intermag'},
+    {'nome': 'LOV', 'lat': 59.340, 'lon': 17.820, 'alt_km': 0.000, 'city': 'Lovo', 'local': 'Intermag'},
+    {'nome': 'LRM', 'lat': -22.220, 'lon': 114.100, 'alt_km': 0.000, 'city': 'Learmonth', 'local': 'Intermag'},
+    {'nome': 'LVV', 'lat': 49.900, 'lon': 23.750, 'alt_km': 0.000, 'city': 'Lviv', 'local': 'Intermag'},
+    {'nome': 'LYC', 'lat': 64.612, 'lon': 18.748, 'alt_km': 0.000, 'city': 'Lycksele', 'local': 'Intermag'},
+    {'nome': 'LZH', 'lat': 36.087, 'lon': 103.845, 'alt_km': 0.000, 'city': 'Lanzhou', 'local': 'Intermag'},
+    {'nome': 'MAB', 'lat': 50.298, 'lon': 5.682, 'alt_km': 0.000, 'city': 'Manhay', 'local': 'Intermag'},
+    {'nome': 'MAW', 'lat': -67.600, 'lon': 62.880, 'alt_km': 0.000, 'city': 'Mawson', 'local': 'Intermag'},
+    {'nome': 'MBC', 'lat': 76.315, 'lon': -119.362, 'alt_km': 0.000, 'city': 'Mould Bay', 'local': 'Intermag'},
+    {'nome': 'MBO', 'lat': 14.390, 'lon': -16.960, 'alt_km': 0.000, 'city': 'Mbour', 'local': 'Intermag'},
+    {'nome': 'MCQ', 'lat': -54.500, 'lon': 158.950, 'alt_km': 0.000, 'city': 'Macquarie Island', 'local': 'Intermag'},
+    {'nome': 'MEA', 'lat': 54.616, 'lon': -113.347, 'alt_km': 0.000, 'city': 'Meanook', 'local': 'Intermag'},
+    {'nome': 'MGD', 'lat': 60.051, 'lon': 150.728, 'alt_km': 0.000, 'city': 'Magadan', 'local': 'Intermag'},
+    {'nome': 'MID', 'lat': 28.210, 'lon': -177.380, 'alt_km': 0.000, 'city': 'Midway Island', 'local': 'Intermag'},
+    {'nome': 'MMB', 'lat': 43.910, 'lon': 144.190, 'alt_km': 0.000, 'city': 'Memambetsu', 'local': 'Intermag'},
+    {'nome': 'MZL', 'lat': 49.600, 'lon': 117.400, 'alt_km': 0.000, 'city': 'Manzhouli', 'local': 'Intermag'},
+    {'nome': 'NAQ', 'lat': 61.167, 'lon': -45.433, 'alt_km': 0.000, 'city': 'Narsarsuaq', 'local': 'Intermag'},
+    {'nome': 'NCK', 'lat': 47.630, 'lon': 16.720, 'alt_km': 0.000, 'city': 'Nagycenk', 'local': 'Intermag'},
+    {'nome': 'NEW', 'lat': 48.270, 'lon': -117.120, 'alt_km': 0.000, 'city': 'Newport', 'local': 'Intermag'},
+    {'nome': 'NGK', 'lat': 52.070, 'lon': 12.680, 'alt_km': 0.000, 'city': 'Niemegk', 'local': 'Intermag'},
+    {'nome': 'NUR', 'lat': 60.510, 'lon': 24.660, 'alt_km': 0.000, 'city': 'Nurmijarvi', 'local': 'Intermag'},
+    {'nome': 'NVS', 'lat': 54.850, 'lon': 83.230, 'alt_km': 0.000, 'city': 'Novosibirsk', 'local': 'Intermag'},
+    {'nome': 'ORC', 'lat': -60.737, 'lon': -44.737, 'alt_km': 0.000, 'city': 'Base Orcadas', 'local': 'Intermag'},
+    {'nome': 'OTT', 'lat': 45.403, 'lon': -75.552, 'alt_km': 0.000, 'city': 'Ottawa', 'local': 'Intermag'},
+    {'nome': 'PAF', 'lat': -49.350, 'lon': 70.260, 'alt_km': 0.000, 'city': 'Port-aux-Francais', 'local': 'Intermag'},
+    {'nome': 'PAG', 'lat': 42.515, 'lon': 24.177, 'alt_km': 0.000, 'city': 'Panagjurishte', 'local': 'Intermag'},
+    {'nome': 'PBQ', 'lat': 55.277, 'lon': -77.745, 'alt_km': 0.000, 'city': 'Poste-de-la-Baleine', 'local': 'Intermag'},
+    {'nome': 'PEG', 'lat': 38.100, 'lon': 23.900, 'alt_km': 0.000, 'city': 'Pedeli', 'local': 'Intermag'},
+    {'nome': 'PET', 'lat': 52.971, 'lon': 158.248, 'alt_km': 0.000, 'city': 'Paratunka', 'local': 'Intermag'},
+    {'nome': 'PHU', 'lat': 21.030, 'lon': 105.960, 'alt_km': 0.000, 'city': 'Phuthuy', 'local': 'Intermag'},
+    {'nome': 'PIL', 'lat': -31.667, 'lon': -63.881, 'alt_km': 0.000, 'city': 'Pilar', 'local': 'Intermag'},
+    {'nome': 'PPT', 'lat': -17.567, 'lon': -149.574, 'alt_km': 0.000, 'city': 'Pamatai, Tahiti', 'local': 'Intermag'},
+    {'nome': 'PST', 'lat': -51.700, 'lon': -57.890, 'alt_km': 0.000, 'city': 'Port Stanley', 'local': 'Intermag'},
+    {'nome': 'QSB', 'lat': 33.871, 'lon': 35.644, 'alt_km': 0.000, 'city': 'Qsaybeh', 'local': 'Intermag'},
+    {'nome': 'RES', 'lat': 74.690, 'lon': -94.895, 'alt_km': 0.000, 'city': 'Resolute Bay', 'local': 'Intermag'},
+    {'nome': 'SBA', 'lat': -77.829, 'lon': 166.671, 'alt_km': 0.000, 'city': 'Scott Base', 'local': 'Intermag'},
+    {'nome': 'SBL', 'lat': 43.932, 'lon': -60.010, 'alt_km': 0.000, 'city': 'Sable Island', 'local': 'Intermag'},
+    {'nome': 'SFS', 'lat': 36.667, 'lon': -5.945, 'alt_km': 0.000, 'city': 'San Fernando', 'local': 'Intermag'},
+    {'nome': 'SHE', 'lat': -15.961, 'lon': -5.747, 'alt_km': 0.000, 'city': 'Saint Helena', 'local': 'Intermag'},
+    {'nome': 'SHU', 'lat': 55.350, 'lon': 199.540, 'alt_km': 0.000, 'city': 'Shumagin', 'local': 'Intermag'},
+    {'nome': 'SIT', 'lat': 57.060, 'lon': -135.330, 'alt_km': 0.000, 'city': 'Sitka', 'local': 'Intermag'},
+    {'nome': 'SJG', 'lat': 18.110, 'lon': -66.150, 'alt_km': 0.000, 'city': 'San Juan', 'local': 'Intermag'},
+    {'nome': 'SOD', 'lat': 67.370, 'lon': 26.630, 'alt_km': 0.000, 'city': 'Sodankyla', 'local': 'Intermag'},
+    {'nome': 'SPG', 'lat': 60.542, 'lon': 29.716, 'alt_km': 0.000, 'city': 'Saint Petersburg', 'local': 'Intermag'},
+    {'nome': 'SPT', 'lat': 39.550, 'lon': -4.350, 'alt_km': 0.000, 'city': 'San Pablo-Toledo', 'local': 'Intermag'},
+    {'nome': 'STJ', 'lat': 47.595, 'lon': -52.677, 'alt_km': 0.000, 'city': 'St John\'s', 'local': 'Intermag'},
+    {'nome': 'STT', 'lat': 37.547, 'lon': -8.728, 'alt_km': 0.000, 'city': 'Sao Teotonio', 'local': 'Intermag'},
+    {'nome': 'SUA', 'lat': 44.680, 'lon': 26.250, 'alt_km': 0.000, 'city': 'Surlari', 'local': 'Intermag'},
+    {'nome': 'TAM', 'lat': 22.790, 'lon': 5.530, 'alt_km': 0.000, 'city': 'Tamanrasset', 'local': 'Intermag'},
+    {'nome': 'TAN', 'lat': -18.917, 'lon': 47.552, 'alt_km': 0.000, 'city': 'Antananarivo', 'local': 'Intermag'},
+    {'nome': 'TDC', 'lat': -37.067, 'lon': -12.316, 'alt_km': 0.000, 'city': 'Tristan da Cunha', 'local': 'Intermag'},
+    {'nome': 'THL', 'lat': 77.470, 'lon': -69.227, 'alt_km': 0.000, 'city': 'Qaanaaq (Thule)', 'local': 'Intermag'},
+    {'nome': 'THY', 'lat': 46.900, 'lon': 17.890, 'alt_km': 0.000, 'city': 'Tihany', 'local': 'Intermag'},
+    {'nome': 'TIK', 'lat': 71.580, 'lon': 129.000, 'alt_km': 0.000, 'city': 'Tiksi', 'local': 'Intermag'},
+    {'nome': 'TSU', 'lat': -19.202, 'lon': 17.584, 'alt_km': 0.000, 'city': 'Tsumeb', 'local': 'Intermag'},
+    {'nome': 'TTB', 'lat': -1.205, 'lon': -48.513, 'alt_km': 0.000, 'city': 'Tatuoca', 'local': 'Intermag'},
+    {'nome': 'TUC', 'lat': 32.170, 'lon': -110.730, 'alt_km': 0.000, 'city': 'Tucson', 'local': 'Intermag'},
+    {'nome': 'UPS', 'lat': 59.903, 'lon': 17.353, 'alt_km': 0.000, 'city': 'Uppsala', 'local': 'Intermag'},
+    {'nome': 'VAL', 'lat': 51.933, 'lon': -10.250, 'alt_km': 0.000, 'city': 'Valentia', 'local': 'Intermag'},
+    {'nome': 'VIC', 'lat': 48.520, 'lon': -123.420, 'alt_km': 0.000, 'city': 'Victoria', 'local': 'Intermag'},
+    {'nome': 'VNA', 'lat': -70.683, 'lon': -8.282, 'alt_km': 0.000, 'city': 'Neumayer Station', 'local': 'Intermag'},
+    {'nome': 'VOS', 'lat': -78.464, 'lon': 106.835, 'alt_km': 0.000, 'city': 'Vostok', 'local': 'Intermag'},
+    {'nome': 'VSS', 'lat': -22.400, 'lon': -43.650, 'alt_km': 0.000, 'city': 'Vassouras', 'local': 'Intermag'},
+    {'nome': 'WIC', 'lat': 47.931, 'lon': 15.866, 'alt_km': 0.000, 'city': 'Conrad', 'local': 'Intermag'},
+    {'nome': 'WMQ', 'lat': 43.810, 'lon': 87.710, 'alt_km': 0.000, 'city': 'Urumqi', 'local': 'Intermag'},
+    {'nome': 'WNG', 'lat': 53.725, 'lon': 9.053, 'alt_km': 0.000, 'city': 'Wingst', 'local': 'Intermag'},
+    {'nome': 'YAK', 'lat': 61.960, 'lon': 129.660, 'alt_km': 0.000, 'city': 'Yakutsk', 'local': 'Intermag'},
+    {'nome': 'YKC', 'lat': 62.480, 'lon': -114.482, 'alt_km': 0.000, 'city': 'Yellowknife', 'local': 'Intermag'},
+    {'nome': 'BOA', 'lat': 2.800556, 'lon': -60.675833, 'alt_km': 0.000, 'city': 'Boa Vista', 'local': 'Embrace'},
+    {'nome': 'MAN', 'lat': -2.888333, 'lon': -59.969722, 'alt_km': 0.000, 'city': 'Manaus', 'local': 'Embrace'},
+    {'nome': 'PVE', 'lat': -8.763611, 'lon': -63.906389, 'alt_km': 0.000, 'city': 'Porto Velho', 'local': 'Embrace'},
+    {'nome': 'BLM', 'lat': -1.441111, 'lon': -48.444444, 'alt_km': 0.000, 'city': 'Belém', 'local': 'Embrace'},
+    {'nome': 'SLZ', 'lat': -2.594167, 'lon': -44.209722, 'alt_km': 0.000, 'city': 'São Luís', 'local': 'Embrace'},
+    {'nome': 'ALF', 'lat': -9.870278, 'lon': -56.104167, 'alt_km': 0.000, 'city': 'Alta Floresta', 'local': 'Embrace'},
+    {'nome': 'ARA', 'lat': -5.600278, 'lon': -48.100556, 'alt_km': 0.000, 'city': 'Araguaína', 'local': 'Embrace'},
+    {'nome': 'EUS', 'lat': -3.880000, 'lon': -38.424444, 'alt_km': 0.000, 'city': 'Fortaleza', 'local': 'Embrace'},
+    {'nome': 'PAL', 'lat': -10.297222, 'lon': -48.361389, 'alt_km': 0.000, 'city': 'Palmas', 'local': 'Embrace'},
+    {'nome': 'CBA', 'lat': -15.554722, 'lon': -56.069444, 'alt_km': 0.000, 'city': 'Cuiabá', 'local': 'Embrace'},
+    {'nome': 'CRR', 'lat': -7.389167, 'lon': -36.539167, 'alt_km': 0.000, 'city': 'Caruaru', 'local': 'Embrace'},
+    {'nome': 'JAT', 'lat': -17.931944, 'lon': -51.718056, 'alt_km': 0.000, 'city': 'Jataí', 'local': 'Embrace'},
+    {'nome': 'CGR', 'lat': -20.506667, 'lon': -54.617778, 'alt_km': 0.000, 'city': 'Campo Grande', 'local': 'Embrace'},
+    {'nome': 'TCM', 'lat': -26.822222, 'lon': -65.194444, 'alt_km': 0.000, 'city': 'Termas de Río Hondo', 'local': 'Embrace'},
+    {'nome': 'MED', 'lat': -25.295278, 'lon': -54.093889, 'alt_km': 0.000, 'city': 'Medianeira', 'local': 'Embrace'},
+    {'nome': 'CXP', 'lat': -22.701944, 'lon': -45.014444, 'alt_km': 0.000, 'city': 'Caraguatatuba', 'local': 'Embrace'},
+    {'nome': 'SJC', 'lat': -23.208611, 'lon': -45.963611, 'alt_km': 0.000, 'city': 'São José dos Campos', 'local': 'Embrace'},
+    {'nome': 'VSS', 'lat': -22.402778, 'lon': -43.652222, 'alt_km': 0.000, 'city': 'Volta Redonda', 'local': 'Embrace'},
+    {'nome': 'SMS', 'lat': -29.443611, 'lon': -53.822778, 'alt_km': 0.000, 'city': 'São Martinho da Serra', 'local': 'Embrace'}
+]
+
+
+
+# Função para selecionar uma estação pelo nome
+def selecionar_estacao_por_nome(nome, estacoes):
+    for estacao in estacoes:
+        if estacao['nome'].upper() == nome.upper():  # Compara ignorando maiúsculas e minúsculas
+            return estacao
+    return None  # Retorna None se a estação não for encontrada
+
+# Função para calcular a estação conjugada e o L-shell
+def calcular_estacao_conjugada(lat, lon, alt_km, dtime):
+    # Converter de latitude/longitude geográfica para geomagnética
+    geomag_lat, geomag_lon, _ = aacgmv2.wrapper.convert_latlon(lat, lon, alt_km, dtime, method_code='G2A')
+    
+    # Calcular o L-shell para a estação original
+    L_shell_original = 1 / (np.cos(np.radians(geomag_lat)) ** 2)
+
+    # Calcular o ponto conjugado invertendo a latitude geomagnética
+    conjugate_geomag_lat = -geomag_lat
+    conjugate_geomag_lon = geomag_lon
+    
+    # Converter as coordenadas geomagnéticas conjugadas de volta para coordenadas geográficas
+    conjugate_geo_lat, conjugate_geo_lon, _ = aacgmv2.wrapper.convert_latlon(conjugate_geomag_lat, conjugate_geomag_lon, alt_km, dtime, method_code='A2G')
+
+    # Calcular o L-shell para a estação conjugada
+    L_shell_conjugada = 1 / (np.cos(np.radians(conjugate_geomag_lat)) ** 2)
+    
+    return conjugate_geo_lat, conjugate_geo_lon, L_shell_original, L_shell_conjugada
+
+# Função para encontrar a estação mais próxima de um ponto conjugado
+def encontrar_estacao_mais_proxima(conjugate_lat, conjugate_lon, estacoes):
+    menor_distancia = float('inf')
+    estacao_mais_proxima = None
+    
+    for estacao in estacoes:
+        # Coordenadas geográficas da estação
+        estacao_coords = (estacao['lat'], estacao['lon'])
+        conjugate_coords = (conjugate_lat, conjugate_lon)
+        
+        # Calcular a distância geodésica
+        distancia = geodesic(estacao_coords, conjugate_coords).km
+        
+        # Verificar se essa é a estação mais próxima
+        if distancia < menor_distancia:
+            menor_distancia = distancia
+            estacao_mais_proxima = estacao
+    
+    return estacao_mais_proxima, menor_distancia
+
+# Selecionar a estação pelo nome
+nome_estacao = 'CXP'  # Nome da estação para seleção
+estacao_selecionada = selecionar_estacao_por_nome(nome_estacao, estacoes)
+
+if estacao_selecionada is None:
+    print(f"Estação com nome {nome_estacao} não encontrada.")
+else:
+    dtime = datetime(2024, 9, 27)  # Data e hora do evento
+    conjugate_lat, conjugate_lon, L_shell_original, L_shell_conjugada = calcular_estacao_conjugada(
+        estacao_selecionada['lat'], estacao_selecionada['lon'], estacao_selecionada['alt_km'], dtime
+    )
+
+    # Encontrar a estação mais próxima do ponto conjugado
+    estacao_proxima, distancia = encontrar_estacao_mais_proxima(conjugate_lat, conjugate_lon, estacoes)
+
+    # Exibir resultados
+    print(f"Estação selecionada: {estacao_selecionada['nome']}")
+    print(f"Coordenadas conjugadas: Latitude: {conjugate_lat:.3f}, Longitude: {conjugate_lon:.3f}")
+    print(f"L-shell da estação original: {L_shell_original:.3f}")
+    print(f"L-shell da estação conjugada: {L_shell_conjugada:.3f}")
+    print(f"Estação mais próxima do ponto conjugado: {estacao_proxima['nome']} a {distancia:.2f} km de distância")
+    
+ #%% Melhores pares
+  
+import aacgmv2
+import numpy as np
+from datetime import datetime
+from geopy.distance import geodesic
+import math
+
+# Conjunto de estações
+# Conjunto de estações
 estacoes = [
     {'nome': 'KHB', 'lat': 47.6100, 'lon': 134.6900, 'alt_km': 0.092}, #Russia
     {'nome': 'NVS', 'lat': 54.8500, 'lon': 83.2300, 'alt_km': 0.130}, #Russia
@@ -24,6 +349,7 @@ estacoes = [
     {'nome': 'MEA', 'lat': 54.616, 'lon': -113.3470, 'alt_km': 0.700}, #CANADA
     {'nome': 'IQA', 'lat': 63.7530, 'lon': -68.5180, 'alt_km': 0.067}, #Canada
     {'nome': 'OTT', 'lat': 45.4030, 'lon': -75.5520, 'alt_km': 0.075}, #canada
+    {'nome': 'AIA', 'lat': -65.245, 'lon': -64.255 , 'alt_km': 0.010}, #antartida
     {'nome': 'WNG', 'lat': 53.725, 'lon': 9.0530, 'alt_km': 0.066}, #Germany
     {'nome': 'NGK', 'lat': 52.0700, 'lon': 12.6800, 'alt_km': 0.078},  #Germany
     {'nome': 'MAB', 'lat': 50.2980, 'lon': 5.6820, 'alt_km': 0.440},  #Belgica
@@ -32,13 +358,10 @@ estacoes = [
     {'nome': 'LYC', 'lat': 64.6120, 'lon': 18.7480, 'alt_km': 0.270},  #Suécia
     {'nome': 'UPS', 'lat': 59.9030, 'lon': 17.3530, 'alt_km': 0.050},  #Suécia
     {'nome': 'WIC', 'lat': 47.9305, 'lon': 15.8657, 'alt_km': 1.088},  #Austria
-    
-    
-    
     {'nome': 'CNB', 'lat': -35.30, 'lon': 149.13, 'alt_km': 0.859}, #Australia
     {'nome': 'KDU', 'lat': -12.69, 'lon': 132.47, 'alt_km': 0.140}, #Australia
     {'nome': 'ASP', 'lat': -23.77, 'lon': 133.88, 'alt_km': 0.557}, #Australia
-    {'nome': 'ASP', 'lat': -54.5000, 'lon': 158.9500, 'alt_km': 0.004}, #Australia
+    #{'nome': 'ASP', 'lat': -54.5000, 'lon': 158.9500, 'alt_km': 0.004}, #Australia
     {'nome': 'EYR', 'lat': -43.4740, 'lon': 172.3930, 'alt_km': 0.102}, #Australia
     {'nome': 'BOA', 'lat': 2.800556, 'lon': -60.675833, 'alt_km': 0.090}, #Brazil
     {'nome': 'MAN', 'lat':-2.888333, 'lon': -59.969722, 'alt_km': 0.092}, #Brazil
@@ -51,59 +374,111 @@ estacoes = [
     {'nome': 'HER', 'lat':-34.43, 'lon': 19.23, 'alt_km': 0.026}, #SouthAfrica
     {'nome': 'KMH', 'lat': -26.54, 'lon': 18.11, 'alt_km': 1.003},  #SouthAfrica
     {'nome': 'BNG', 'lat': 4.3300, 'lon': 18.11, 'alt_km': 0.395},  #centralAfrica
+    {'nome': 'TSU', 'lat': -19.2020, 'lon': 17.5840, 'alt_km': 1.273},  #SouthAfrica
+    {'nome': 'BLC', 'lat': 64.3180, 'lon': -96.0120, 'alt_km': 0.030},  #cANADA
+    {'nome': 'THL', 'lat': 77.4700, 'lon': -69.2270, 'alt_km': 0.057}, #Groelandia
+    {'nome': 'PIL', 'lat': 31.6670, 'lon': -63.8810, 'alt_km': 0.057},
+    {'nome': 'TAM', 'lat': 22.7900, 'lon': 5.5300, 'alt_km': 1.373},#Africa
+    {'nome': 'ABG', 'lat': 18.638, 'lon': 72.872, 'alt_km': 0.007},#India
+    {'nome': 'JAI', 'lat': 26.9200, 'lon': 75.800, 'alt_km': 0.000},#India
+    {'nome': 'HYB', 'lat': 17.4200, 'lon': 78.5500, 'alt_km': 0.500},#India
+    {'nome': 'CPL', 'lat': 17.29, 'lon': 78.919, 'alt_km': 0.500},#India
+    {'nome': 'GAN', 'lat': -0.6946, 'lon': 73.153, 'alt_km': 0.002},#Maldivas
+    
+   
+  
+    
    
 ]
 
+# Função para calcular a estação conjugada
+def calcular_estacao_conjugada(lat, lon, alt_km, dtime):
+    # Converter de latitude/longitude geográfica para geomagnética
+    geomag_lat, geomag_lon, _ = aacgmv2.wrapper.convert_latlon(lat, lon, alt_km, dtime, method_code='G2A')
+    
+    # Calcular o ponto conjugado invertendo a latitude geomagnética
+    conjugate_geomag_lat = -geomag_lat
+    conjugate_geomag_lon = geomag_lon
+    
+    # Converter as coordenadas geomagnéticas conjugadas de volta para coordenadas geográficas
+    conjugate_geo_lat, conjugate_geo_lon, _ = aacgmv2.wrapper.convert_latlon(conjugate_geomag_lat, conjugate_geomag_lon, alt_km, dtime, method_code='A2G')
+    
+    return conjugate_geo_lat, conjugate_geo_lon
+
+# Função para encontrar a estação mais próxima de um ponto conjugado
+def encontrar_estacao_mais_proxima(conjugate_lat, conjugate_lon, estacoes):
+    menor_distancia = float('inf')
+    estacao_mais_proxima = None
+    
+    for estacao in estacoes:
+        if 'lat' in estacao and 'lon' in estacao and not math.isnan(estacao['lat']) and not math.isnan(estacao['lon']):
+            # Coordenadas geográficas da estação
+            estacao_coords = (estacao['lat'], estacao['lon'])
+            conjugate_coords = (conjugate_lat, conjugate_lon)
+            
+            # Calcular a distância geodésica
+            try:
+                distancia = geodesic(estacao_coords, conjugate_coords).km
+            except ValueError:
+                continue  # Ignora se ocorrer erro no cálculo da distância
+            
+            # Verificar se essa é a estação mais próxima
+            if distancia < menor_distancia:
+                menor_distancia = distancia
+                estacao_mais_proxima = estacao
+    
+    return estacao_mais_proxima, menor_distancia
+
+# Função para encontrar os melhores pares conjugados
+def encontrar_melhores_pares_conjugados(estacoes):
+    dtime = datetime(2024, 9, 27)  # Data e hora do evento
+    melhores_pares = []
+
+    # Iterar sobre todas as estações
+    for estacao in estacoes:
+        if 'lat' in estacao and 'lon' in estacao and not math.isnan(estacao['lat']) and not math.isnan(estacao['lon']):
+            try:
+                # Calcular o ponto conjugado da estação
+                conjugate_lat, conjugate_lon = calcular_estacao_conjugada(
+                    estacao['lat'], estacao['lon'], estacao['alt_km'], dtime
+                )
+
+                # Verificar se as coordenadas conjugadas são válidas
+                if not math.isnan(conjugate_lat) and not math.isnan(conjugate_lon):
+                    # Encontrar a estação mais próxima do ponto conjugado
+                    estacao_proxima, distancia = encontrar_estacao_mais_proxima(conjugate_lat, conjugate_lon, estacoes)
+
+                    # Armazenar o resultado
+                    melhores_pares.append({
+                        'estacao_origem': estacao['nome'],
+                        'estacao_conjugada_proxima': estacao_proxima['nome'] if estacao_proxima else 'None',
+                        'distancia_km': distancia
+                    })
+            except Exception as e:
+                print(f"Erro ao calcular para a estação {estacao['nome']}: {e}")
+
+    # Ordenar os pares pela distância
+    melhores_pares_ordenados = sorted(melhores_pares, key=lambda x: x['distancia_km'])
+    
+    return melhores_pares_ordenados
+
+# Encontrar e exibir os melhores pares conjugados
+melhores_pares = encontrar_melhores_pares_conjugados(estacoes)
+
+# Exibir os resultados
+for par in melhores_pares:
+    print(f"Estação original: {par['estacao_origem']}, Estação conjugada mais próxima: {par['estacao_conjugada_proxima']}, Distância: {par['distancia_km']:.2f} km")
 
 
-#%%
-coordenadasmagneticas = calcular_coordenadas_magneticas2(estacoes, date)
 
 
 
-#%%
 
-def encontrar_estacoes_proximas(estacao_entrada, coordenadasmagneticas, limite=0.2):
-    """
-    Encontra estações com L-shell próximo ao da estação de entrada e no hemisfério oposto.
 
-    Parâmetros:
-    - estacao_entrada (str): Nome da estação de entrada.
-    - todas_estacoes (list): Lista de dicionários contendo todas as estações e seus L-shells.
-    - limite (float): Limite de diferença aceitável entre os L-shells.
 
-    Retorna:
-    - list: Lista de dicionários das estações próximas e no hemisfério oposto.
-    """
-    estacao_entrada_lshell = None
-    estacao_entrada_lat = None
 
-    # Encontrar o L-shell e a latitude da estação de entrada
-    for estacao in coordenadasmagneticas:
-        if estacao['nome'] == estacao_entrada:
-            estacao_entrada_lshell = estacao['L_shell']
-            estacao_entrada_lat = estacao['lat_m']
-            break
 
-    # Verificar se a estação de entrada foi encontrada
-    if estacao_entrada_lshell is None or estacao_entrada_lat is None:
-        print(f"Estação '{estacao_entrada}' não encontrada.")
-        return []
 
-    # Encontrar estações próximas e no hemisfério oposto
-    estacoes_proximas = []
-    for estacao in coordenadasmagneticas:
-        if abs(estacao['L_shell'] - estacao_entrada_lshell) <= limite and \
-           (estacao['lat_m'] > 0) != (estacao_entrada_lat > 0):
-            estacoes_proximas.append(estacao)
 
-    return estacoes_proximas
-
-# Exemplo de uso
-estacao_entrada = 'SJG'
-estacoes_proximas = encontrar_estacoes_proximas(estacao_entrada, coordenadasmagneticas)
-
-# Exibir estações próximas e no hemisfério oposto
-print(f"Estações próximas e no hemisfério oposto à '{estacao_entrada}':")
-for estacao in estacoes_proximas:
-    print(f"Nome: {estacao['nome']}, L-shell: {estacao['L_shell']}, Latitude: {estacao['lat_m']}")
+  
+         
